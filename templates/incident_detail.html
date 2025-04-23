@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-exclamation-triangle me-2"></i>Incident Details</h2>
+        
+        <div>
+            <a href="{{ url_for('incidents') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Back to Incidents
+            </a>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Incident details card -->
+            <div class="card mb-4">
+                <div class="card-header bg-{{ 'danger' if incident.severity == 'high' else 'warning' if incident.severity == 'medium' else 'info' }} text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas {{ 'fa-radiation-alt' if incident.severity == 'high' else 'fa-exclamation-triangle' if incident.severity == 'medium' else 'fa-info-circle' }} me-2"></i>
+                            {{ incident.severity|capitalize }} Severity Incident #{{ incident.id }}
+                        </h5>
+                        <span class="badge bg-light text-dark">
+                            {{ incident.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Source IP</h6>
+                            <p class="lead">{{ incident.src_ip }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Destination IP</h6>
+                            <p class="lead">{{ incident.dst_ip }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Protocol</h6>
+                            <p class="lead">{{ incident.protocol }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Status</h6>
+                            <p class="lead">
+                                <span class="badge bg-{{ 'success' if incident.resolved else 'secondary' }}">
+                                    {{ 'Resolved' if incident.resolved else 'Open' }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h6 class="text-muted">Details</h6>
+                            <div class="p-3 bg-dark border border-secondary rounded">
+                                <pre class="mb-0"><code>{{ incident.details }}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Notes and resolution card -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Notes & Resolution</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Incident Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="5">{{ incident.notes or '' }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="resolved" name="resolved" {{ 'checked' if incident.resolved else '' }}>
+                            <label class="form-check-label" for="resolved">Mark as Resolved</label>
+                        </div>
+                        
+                        {% if current_user.is_admin %}
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="block_src_ip" name="block_src_ip">
+                            <label class="form-check-label" for="block_src_ip">Block Source IP Address</label>
+                            <small class="form-text text-muted d-block">Add the source IP ({{ incident.src_ip }}) to the blocklist</small>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Recommended actions card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>Recommended Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% if incident.severity == 'high' %}
+                        <li class="list-group-item bg-transparent">
+                            <i class="fas fa-ban text-danger me-2"></i>
+                            Block source IP address immediately
+                        </li>
+                        <li class="list-group-item bg-transparent">
+                            <i class="fas fa-search text-info me-2"></i>
+                            Investigate all traffic from this source
+                        </li>
+                        <li class="list-group-item bg-transparent">
+                            <i class="fas fa-file-alt text-warning me-2"></i>
+                            Generate full incident report
+                        </li>
+                        {% elif incident.severity == 'medium' %}
+                        <li class="list-group-item bg-transparent">
+                            <i class="fas fa-search text-info me-2"></i>
+                            Monitor additional traffic from this source
+                        </li>
+                        <li class="list-group-item bg-transparent">
+                            <i class="fas fa-user-shield text-warning me-2"></i>
+                            Verify security controls are in place
+                        </li>
+                        {% else %}
+                        <li class="list-group-item bg-transparent">
+                            <i class="fas fa-eye text-info me-2"></i>
+                            Monitor for pattern establishment
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- IP Information card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>IP Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <strong>Source IP:</strong> {{ incident.src_ip }}
+                    </p>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="https://www.abuseipdb.com/check/{{ incident.src_ip }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-external-link-alt me-1"></i>Check on AbuseIPDB
+                        </a>
+                        <a href="https://www.virustotal.com/gui/ip-address/{{ incident.src_ip }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-external-link-alt me-1"></i>Check on VirusTotal
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Related incidents card -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-link me-2"></i>Related Incidents
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% set related_incidents = Incident.query.filter_by(src_ip=incident.src_ip).filter(Incident.id != incident.id).order_by(Incident.timestamp.desc()).limit(5).all() %}
+                        
+                        {% if related_incidents %}
+                            {% for related in related_incidents %}
+                            <li class="list-group-item bg-transparent">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="{{ url_for('incident_detail', id=related.id) }}" class="text-decoration-none">
+                                        <span class="badge bg-{{ 'danger' if related.severity == 'high' else 'warning' if related.severity == 'medium' else 'info' }} me-2">
+                                            {{ related.severity|capitalize }}
+                                        </span>
+                                        <small>{{ related.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+                                    </a>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        {% else %}
+                            <li class="list-group-item bg-transparent text-muted">
+                                No related incidents found.
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

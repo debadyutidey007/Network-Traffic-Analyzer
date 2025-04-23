@@ -1,0 +1,8 @@
+.history/
+instance/
+venv/
+analyzer_config.ini
+analyzer_output.txt
+desktop.ini
+network_traffic.db
+network_traffic.log

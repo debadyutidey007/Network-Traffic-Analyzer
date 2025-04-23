@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4"><i class="fas fa-chart-bar me-2"></i>Reports</h2>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Generate report card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-file-alt me-2"></i>Generate Report
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="report-form" method="POST" action="{{ url_for('generate_report') }}">
+                        <div class="mb-3">
+                            <label for="report_type" class="form-label">Report Type</label>
+                            <select class="form-select" id="report_type" name="report_type" required>
+                                <option value="general">General Overview</option>
+                                <option value="incidents">Security Incidents</option>
+                                <option value="traffic">Traffic Analysis</option>
+                                <option value="anomaly">Anomaly Detection</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-download me-1"></i>Generate Report
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Report explanation card -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>About Reports
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>Reports provide detailed analysis of network traffic and security incidents.</p>
+                    
+                    <h6 class="mt-3">Report Types:</h6>
+                    <ul class="list-unstyled">
+                        <li>
+                            <i class="fas fa-file-alt text-primary me-2"></i>
+                            <strong>General Overview</strong>
+                            <p class="text-muted small">Complete overview of network security status.</p>
+                        </li>
+                        <li>
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            <strong>Security Incidents</strong>
+                            <p class="text-muted small">Detailed analysis of recent security incidents.</p>
+                        </li>
+                        <li>
+                            <i class="fas fa-chart-line text-success me-2"></i>
+                            <strong>Traffic Analysis</strong>
+                            <p class="text-muted small">Analysis of network traffic patterns.</p>
+                        </li>
+                        <li>
+                            <i class="fas fa-search text-danger me-2"></i>
+                            <strong>Anomaly Detection</strong>
+                            <p class="text-muted small">Focus on detected anomalies and potential threats.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Recent reports card -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>Recent Reports
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th>Generated</th>
+                                    <th>User</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in reports %}
+                                <tr>
+                                    <td>{{ report.title }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'primary' if report.report_type == 'general' else 'warning' if report.report_type == 'incidents' else 'success' if report.report_type == 'traffic' else 'danger' }}">
+                                            {{ report.report_type|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>{{ report.generated_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                    <td>{{ report.user.username if report.user else 'System' }}</td>
+                                    <td>
+                                        <a href="{{ url_for('download_report', filename=report.file_path) }}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Download">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No reports generated yet</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/reports.js"></script>
+{% endblock %}

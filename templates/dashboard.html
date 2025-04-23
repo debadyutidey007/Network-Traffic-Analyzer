@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h2>
+        
+        {% if current_user.is_admin %}
+        <div class="btn-group">
+            <button id="start-analyzer" class="btn btn-success" {{ 'disabled' if analyzer_running else '' }}>
+                <i class="fas fa-play me-1"></i>Start Analyzer
+            </button>
+            <button id="stop-analyzer" class="btn btn-danger" {{ 'disabled' if not analyzer_running else '' }}>
+                <i class="fas fa-stop me-1"></i>Stop Analyzer
+            </button>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Status Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Analyzer Status</h6>
+                            <h3 class="mb-0" id="analyzer-display-status">
+                                <span class="text-{{ 'success' if analyzer_running else 'danger' }}">
+                                    {{ 'Running' if analyzer_running else 'Stopped' }}
+                                </span>
+                            </h3>
+                        </div>
+                        <div id="analyzer-display-icon">
+                            <i class="fas fa-{{ 'play-circle text-success' if analyzer_running else 'stop-circle text-danger' }} fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">High Severity</h6>
+                            <h3 class="mb-0 text-danger">{{ severity_counts.high }}</h3>
+                        </div>
+                        <div>
+                            <i class="fas fa-radiation-alt fa-3x text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Medium Severity</h6>
+                            <h3 class="mb-0 text-warning">{{ severity_counts.medium }}</h3>
+                        </div>
+                        <div>
+                            <i class="fas fa-exclamation-triangle fa-3x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Low Severity</h6>
+                            <h3 class="mb-0 text-info">{{ severity_counts.low }}</h3>
+                        </div>
+                        <div>
+                            <i class="fas fa-info-circle fa-3x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Protocol Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="protocolChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Incident Timeline</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Incidents by Severity</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="severityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Live Traffic and Recent Incidents -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-stream me-2"></i>Live Traffic
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="live-traffic-stats">
+                        <div class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Waiting for traffic data...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Recent Incidents
+                        </h5>
+                        <a href="{{ url_for('incidents') }}" class="btn btn-sm btn-outline-info">
+                            View All
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Source IP</th>
+                                    <th>Protocol</th>
+                                    <th>Severity</th>
+                                    <th>Details</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="incidents-table-body">
+                                {% for incident in recent_incidents %}
+                                <tr class="incident-{{ incident.severity }}">
+                                    <td>{{ incident.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                    <td>{{ incident.src_ip }}</td>
+                                    <td>{{ incident.protocol }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'danger' if incident.severity == 'high' else 'warning' if incident.severity == 'medium' else 'info' }}">
+                                            {{ incident.severity|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>{{ incident.details }}</td>
+                                    <td>
+                                        <a href="{{ url_for('incident_detail', id=incident.id) }}" class="btn btn-sm btn-outline-info">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}

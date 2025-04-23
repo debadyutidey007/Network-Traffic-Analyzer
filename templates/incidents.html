@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4"><i class="fas fa-exclamation-triangle me-2"></i>Security Incidents</h2>
+    
+    <!-- Filter card -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Filters</h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label for="severity" class="form-label">Severity</label>
+                    <select class="form-select" id="severity" name="severity">
+                        <option value="">All</option>
+                        <option value="high" {{ 'selected' if request.args.get('severity') == 'high' else '' }}>High</option>
+                        <option value="medium" {{ 'selected' if request.args.get('severity') == 'medium' else '' }}>Medium</option>
+                        <option value="low" {{ 'selected' if request.args.get('severity') == 'low' else '' }}>Low</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="protocol" class="form-label">Protocol</label>
+                    <select class="form-select" id="protocol" name="protocol">
+                        <option value="">All</option>
+                        {% for protocol in protocols %}
+                        <option value="{{ protocol }}" {{ 'selected' if request.args.get('protocol') == protocol else '' }}>{{ protocol }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="src_ip" class="form-label">Source IP</label>
+                    <input type="text" class="form-control" id="src_ip" name="src_ip" value="{{ request.args.get('src_ip', '') }}">
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="resolved" class="form-label">Status</label>
+                    <select class="form-select" id="resolved" name="resolved">
+                        <option value="">All</option>
+                        <option value="no" {{ 'selected' if request.args.get('resolved') == 'no' else '' }}>Open</option>
+                        <option value="yes" {{ 'selected' if request.args.get('resolved') == 'yes' else '' }}>Resolved</option>
+                    </select>
+                </div>
+                
+                <div class="col-12">
+                    <div class="float-end">
+                        <a href="{{ url_for('incidents') }}" class="btn btn-secondary">Reset</a>
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Incidents table -->
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Incidents</h5>
+                
+                <div class="btn-group">
+                    <a href="{{ url_for('api_export_incidents', format='csv') }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-file-csv me-1"></i>Export CSV
+                    </a>
+                    <a href="{{ url_for('api_export_incidents', format='json') }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-file-code me-1"></i>Export JSON
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Timestamp</th>
+                            <th>Source IP</th>
+                            <th>Destination IP</th>
+                            <th>Protocol</th>
+                            <th>Severity</th>
+                            <th>Details</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for incident in incidents.items %}
+                        <tr class="incident-{{ incident.severity }}">
+                            <td>{{ incident.id }}</td>
+                            <td>{{ incident.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td>{{ incident.src_ip }}</td>
+                            <td>{{ incident.dst_ip }}</td>
+                            <td>{{ incident.protocol }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'danger' if incident.severity == 'high' else 'warning' if incident.severity == 'medium' else 'info' }}">
+                                    {{ incident.severity|capitalize }}
+                                </span>
+                            </td>
+                            <td>{{ incident.details[:50] }}{{ '...' if incident.details|length > 50 else '' }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if incident.resolved else 'secondary' }}">
+                                    {{ 'Resolved' if incident.resolved else 'Open' }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('incident_detail', id=incident.id) }}" class="btn btn-sm btn-outline-info">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="9" class="text-center">No incidents found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if incidents.pages > 1 %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if incidents.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('incidents', page=incidents.prev_num, **request.args) }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in incidents.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                        {% if page_num %}
+                            {% if page_num == incidents.page %}
+                            <li class="page-item active">
+                                <a class="page-link" href="#">{{ page_num }}</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('incidents', page=page_num, **request.args) }}">{{ page_num }}</a>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#">...</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if incidents.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('incidents', page=incidents.next_num, **request.args) }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Traffic Analyzer</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Socket.IO -->
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+    <!-- Custom CSS -->
+    <style>
+        body 
+        {
+            padding-top: 56px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar 
+        {
+            min-height: calc(100vh - 56px);
+            background-color: var(--bs-dark);
+            border-right: 1px solid var(--bs-gray-700);
+        }
+        
+        .main-content 
+        {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .card 
+        {
+            margin-bottom: 20px;
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            background-color: var(--bs-dark);
+        }
+        
+        .chart-container 
+        {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .incident-high 
+        {
+            background-color: rgba(255, 99, 132, 0.1) !important;
+        }
+        
+        .incident-medium 
+        {
+            background-color: rgba(255, 206, 86, 0.1) !important;
+        }
+        
+        .incident-low 
+        {
+            background-color: rgba(75, 192, 192, 0.1) !important;
+        }
+        
+        .footer 
+        {
+            padding: 20px 0;
+            margin-top: auto;
+            background-color: var(--bs-dark);
+            border-top: 1px solid var(--bs-gray-700);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                <i class="fas fa-shield-alt me-2"></i>Network Traffic Analyzer
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('incidents') }}">
+                            <i class="fas fa-exclamation-triangle me-1"></i>Incidents
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('reports') }}">
+                            <i class="fas fa-chart-bar me-1"></i>Reports
+                        </a>
+                    </li>
+                    {% if current_user.is_admin %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('config') }}">
+                            <i class="fas fa-cogs me-1"></i>Configuration
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <span class="nav-link text-info" id="analyzer-status-indicator">
+                            <i class="fas fa-circle text-{{ 'success' if analyzer_running else 'danger' }} me-1"></i>
+                            {{ 'Running' if analyzer_running else 'Stopped' }}
+                        </span>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>{{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- Main content -->
+    <div class="container-fluid">
+        <div class="row">
+            {% if current_user.is_authenticated %}
+            <div class="col-md-2 d-none d-md-block sidebar py-3">
+                <div class="list-group">
+                    <a href="{{ url_for('dashboard') }}" class="list-group-item list-group-item-action bg-transparent border-0">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                    <a href="{{ url_for('incidents') }}" class="list-group-item list-group-item-action bg-transparent border-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Incidents
+                    </a>
+                    <a href="{{ url_for('reports') }}" class="list-group-item list-group-item-action bg-transparent border-0">
+                        <i class="fas fa-chart-bar me-2"></i>Reports
+                    </a>
+                    {% if current_user.is_admin %}
+                    <a href="{{ url_for('config') }}" class="list-group-item list-group-item-action bg-transparent border-0">
+                        <i class="fas fa-cogs me-2"></i>Configuration
+                    </a>
+                    <a href="{{ url_for('register') }}" class="list-group-item list-group-item-action bg-transparent border-0">
+                        <i class="fas fa-user-plus me-2"></i>Add User
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-10 ms-sm-auto px-md-4 main-content">
+            {% else %}
+            <div class="col-12 main-content">
+            {% endif %}
+                <!-- Flash messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <!-- Content from child templates -->
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+    <!-- Footer -->
+    <footer class="footer text-center">
+        <div class="container">
+            <span class="text-muted">Network Traffic Analyzer &copy; {{ current_year }} | Built with ML-powered threat detection</span>
+        </div>
+    </footer>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Common JS -->
+    <script src="/static/js/socket.js"></script>
+    <script src="/static/js/chart-utils.js"></script>
+    
+    <!-- Page-specific JS -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>
