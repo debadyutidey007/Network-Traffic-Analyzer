@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-"""
-Network Traffic Analyzer with ML-powered Threat Detection
-"""
 import os
 import sys
 import re
