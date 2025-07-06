@@ -1,5 +1,6 @@
 # Network Traffic Analyzer
 
+[![Repo Size](https://img.shields.io/github/repo-size/debadyutidey007/Currency_Convertor_And_Purchase_Power_Parity_Calculator)](https://github.com/debadyutidey007/Currency_Convertor_And_Purchase_Power_Parity_Calculator)
 [![Version](https://img.shields.io/badge/Version-1.0.0-blue.svg)](https://github.com/debadyutidey007/Currency_Convertor_And_Purchase_Power_Parity_Calculator)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![GitHub stars](https://img.shields.io/github/stars/debadyutidey007/Network-Traffic-Analyzer.svg?style=social)](https://github.com/debadyutidey007/Network-Traffic-Analyzer/stargazers)
@@ -328,12 +329,4 @@ If you discover a bug, encounter unexpected behavior, or have a suggestion for a
 
 ## License
 
-This project is released under the terms of the **MIT License**. This permissive open-source license grants users the freedom to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the software, subject to the inclusion of the original copyright notice and permission notice. For the complete terms and conditions, please refer to the `LICENSE` file located in the root directory of this repository.
-
-## Contact
-
-For professional inquiries, collaborative opportunities, or general feedback regarding the Network Traffic Analyzer, please do not hesitate to establish contact:
-
-**Debadyuti Dey**
-
-* **Email:** [debadyu
+This project is released under the terms of the **MIT License**. This permissive open-source license grants users the freedom to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the software, subject to the inclusion of the original copyright notice and permission notice. For the complete terms and conditions, please refer to the `LICENSE` file located in the root directory of this reposito
