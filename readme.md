@@ -8,10 +8,9 @@
 [![GitHub stars](https://img.shields.io/github/stars/debadyutidey007/Network-Traffic-Analyzer.svg?style=social)](https://github.com/debadyutidey007/Network-Traffic-Analyzer/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/debadyutidey007/Network-Traffic-Analyzer.svg?style=social)](https://github.com/debadyutidey007/Network-Traffic-Analyzer/network/members)
 [![Repo Size](https://img.shields.io/github/repo-size/debadyutidey007/Network-Traffic-Analyzer)](https://github.com/debadyutidey007/Network-Traffic-Analyzer)
+</div>
 
 A Python-based utility for comprehensive network packet capture, in-depth analysis, and insightful visualization. Designed for network professionals, cybersecurity analysts, and researchers.
-
-</div>
 
 ---
 
