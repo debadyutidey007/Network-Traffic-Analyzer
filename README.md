@@ -1,5 +1,19 @@
 # Network Traffic Analyzer
 
+<div align="center">
+
+[![Version](https://img.shields.io/badge/Version-1.0.0-blue.svg)](https://github.com/debadyutidey007/Network-Traffic-Analyzer)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Python Version](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/)
+[![GitHub stars](https://img.shields.io/github/stars/debadyutidey007/Network-Traffic-Analyzer.svg?style=social)](https://github.com/debadyutidey007/Network-Traffic-Analyzer/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/debadyutidey007/Network-Traffic-Analyzer.svg?style=social)](https://github.com/debadyutidey007/Network-Traffic-Analyzer/network/members)
+[![Repo Size](https://img.shields.io/github/repo-size/debadyutidey007/Network-Traffic-Analyzer)](https://github.com/debadyutidey007/Network-Traffic-Analyzer)
+</div>
+
+A Python-based utility for comprehensive network packet capture, in-depth analysis, and insightful visualization. Designed for network professionals, cybersecurity analysts, and researchers.
+
+---
+
 ## Overview
 The Network Traffic Analyzer is a Flask-based web application designed to monitor, analyze, and visualize network traffic. It provides real-time insights into network activities, detects anomalies using machine learning, and generates detailed reports. The application supports user authentication, incident management, blocklist management, and integration with external threat intelligence services like VirusTotal. It operates in demo mode by default due to the absence of packet capture libraries, simulating network traffic for testing and demonstration purposes.
 
