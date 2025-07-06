@@ -56,7 +56,7 @@ Features
 6. Run the Application:
    python network_traffic_analyzer.py
 
-   The app runs on http://0.0.0.0:5000 with debug mode enabled.
+   The app runs on http://127.0.0.0:5000 with debug mode enabled.
 
 # Usage
 1. Access the Web Interface:
