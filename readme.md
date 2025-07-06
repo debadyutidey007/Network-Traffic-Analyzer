@@ -1,6 +1,7 @@
 # Network Traffic Analyzer
 
-[![GitHub license](https://img.shields.io/github/license/debadyutidey007/Network-Traffic-Analyzer.svg)](https://github.com/debadyutidey007/Network-Traffic-Analyzer/blob/main/LICENSE)
+[![Version](https://img.shields.io/badge/Version-1.0.0-blue.svg)](https://github.com/debadyutidey007/Currency_Convertor_And_Purchase_Power_Parity_Calculator)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![GitHub stars](https://img.shields.io/github/stars/debadyutidey007/Network-Traffic-Analyzer.svg?style=social)](https://github.com/debadyutidey007/Network-Traffic-Analyzer/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/debadyutidey007/Network-Traffic-Analyzer.svg?style=social)](https://github.com/debadyutidey007/Network-Traffic-Analyzer/network/members)
 [![Python Version](https://img.shields.io/badge/python-3.x-blue.svg)](https://www.python.org/)
@@ -335,6 +336,4 @@ For professional inquiries, collaborative opportunities, or general feedback reg
 
 **Debadyuti Dey**
 
-* **Email:** [debadyutidey007@gmail.com](mailto:debadyutidey007@gmail.com)
-
-* **GitHub Profile:** [http
+* **Email:** [debadyu
